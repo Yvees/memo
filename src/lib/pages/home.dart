@@ -50,6 +50,13 @@ class HomePageState extends State<HomePage> {
                       Navigator.pushNamed(context, '/remove');
                     },
                   ),
+                  PopupMenuItem(
+                    value: 'reset',
+                    child: const Text('重置所有'),
+                    onTap: () {
+                      Navigator.pushNamed(context, '/reset');
+                    },
+                  ),
                 ],
               );
             },
