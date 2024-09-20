@@ -63,13 +63,15 @@ class _ItemListViewState extends State<ItemListView> {
         final item = items[index];
         return SwitchListTile(
           title: Text(item.name),
-          value: item.status == ItemStatus.done,
+          value: item.status == ItemStatus.undone, // 未完成时开关打开
           onChanged: (bool value) {
             setState(() {
-              item.status = value ? ItemStatus.done : ItemStatus.undone;
+              item.status = value ? ItemStatus.undone : ItemStatus.done;
               DatabaseHelper().updateItem(item); // 更新数据库
             });
           },
+          activeColor: Colors.lightGreen, // 未完成（开关打开）时的颜色
+          inactiveThumbColor: Colors.grey, // 已完成（开关关闭）时的颜色
         );
       },
     );
