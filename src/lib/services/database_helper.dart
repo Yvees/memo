@@ -59,6 +59,13 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) => ItemEntry.fromMap(maps[i]));
   }
 
+  Future<List<ItemEntry>> getItemsByType(ItemType type) async {
+    Database db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('item',
+        where: 'type = ?', whereArgs: [type.value], orderBy: 'status DESC');
+    return List.generate(maps.length, (i) => ItemEntry.fromMap(maps[i]));
+  }
+
   Future<int> deleteItem(int id) async {
     final db = await database;
     return await db.delete(
