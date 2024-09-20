@@ -70,8 +70,7 @@ class _ItemListViewState extends State<ItemListView> {
               DatabaseHelper().updateItem(item); // 更新数据库
             });
           },
-          activeColor: Colors.lightGreen, // 未完成（开关打开）时的颜色
-          inactiveThumbColor: Colors.grey, // 已完成（开关关闭）时的颜色
+          activeTrackColor: Colors.lightGreen, // 未完成（开关打开）时中间区域的颜色
         );
       },
     );
