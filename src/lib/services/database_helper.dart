@@ -84,4 +84,13 @@ class DatabaseHelper {
       whereArgs: [entry.id],
     );
   }
+
+  Future<void> resetAllItems(bool isDone) async {
+    final db = await database;
+    await db.update(
+      'item',
+      {'status': isDone ? 1 : 0},
+      where: null, // 这将更新所有行
+    );
+  }
 }

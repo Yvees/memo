@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io' show Platform;
 import 'pages/home.dart';
+import 'pages/reset.dart';
 import 'services/database_helper.dart';
 
 void main() async {
@@ -35,7 +36,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Baby Diary',
+      title: 'Memo',
       theme: ThemeData(
         primarySwatch: Colors.lightGreen,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -47,6 +48,11 @@ class MainApp extends StatelessWidget {
         );
       },
       home: const HomePage(),
+      routes: {
+        //'/add': (context) => const AddPage(),
+        //'/remove': (context) => const RemovePage(),
+        '/reset': (context) => const ResetPage(),
+      },
     );
   }
 }
