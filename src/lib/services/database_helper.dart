@@ -55,7 +55,7 @@ class DatabaseHelper {
   Future<List<ItemEntry>> getItems() async {
     Database db = await database;
     final List<Map<String, dynamic>> maps =
-        await db.query('item', orderBy: 'date DESC');
+        await db.query('item', orderBy: 'type DESC');
     return List.generate(maps.length, (i) => ItemEntry.fromMap(maps[i]));
   }
 
