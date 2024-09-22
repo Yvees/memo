@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io' show Platform;
+import 'pages/add.dart';
 import 'pages/home.dart';
 import 'pages/remove.dart';
 import 'pages/reset.dart';
@@ -50,7 +51,7 @@ class MainApp extends StatelessWidget {
       },
       home: const HomePage(),
       routes: {
-        //'/add': (context) => const AddPage(),
+        '/add': (context) => const AddPage(),
         '/remove': (context) => const RemovePage(),
         '/reset': (context) => const ResetPage(),
       },
