@@ -12,6 +12,7 @@ dependencies:
   sqflite_common_ffi: ^2.3.3
   provider: ^6.1.2
   path: ^1.9.0
+  flutter_launcher_icons: ^0.14.0
 
 dev_dependencies:
   flutter_test:
