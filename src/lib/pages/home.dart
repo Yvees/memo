@@ -26,6 +26,8 @@ class HomePageState extends State<HomePage> {
             _buildIconButton(context, Icons.apple, ItemType.fruit),
             _buildIconButton(context, Icons.restaurant_menu, ItemType.meat),
             _buildIconButton(context, Icons.local_drink, ItemType.drink),
+            _buildIconButton(
+                context, Icons.baby_changing_station, ItemType.baby),
           ],
         ),
         actions: [

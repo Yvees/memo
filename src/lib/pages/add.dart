@@ -103,7 +103,7 @@ class AddPageState extends State<AddPage> {
   String _getItemTypeName(ItemType type) {
     switch (type) {
       case ItemType.home:
-        return '家用品';
+        return '日用';
       case ItemType.food:
         return '食物';
       case ItemType.fruit:
@@ -112,6 +112,8 @@ class AddPageState extends State<AddPage> {
         return '肉类';
       case ItemType.drink:
         return '饮料';
+      case ItemType.baby:
+        return '婴儿';
     }
   }
 }

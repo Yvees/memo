@@ -11,7 +11,8 @@ enum ItemType {
   food(1),
   fruit(2),
   meat(3),
-  drink(4);
+  drink(4),
+  baby(5);
 
   final int value;
   const ItemType(this.value);
