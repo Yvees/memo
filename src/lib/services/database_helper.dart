@@ -229,6 +229,11 @@ class DatabaseHelper {
     });
     await db.insert('item', {
       'type': ItemType.food.value,
+      'name': '醋',
+      'status': ItemStatus.undone.value
+    });
+    await db.insert('item', {
+      'type': ItemType.food.value,
       'name': '生抽',
       'status': ItemStatus.undone.value
     });
@@ -239,12 +244,12 @@ class DatabaseHelper {
     });
     await db.insert('item', {
       'type': ItemType.food.value,
-      'name': '橄榄油',
+      'name': '麻油',
       'status': ItemStatus.undone.value
     });
     await db.insert('item', {
       'type': ItemType.food.value,
-      'name': '醋',
+      'name': '橄榄油',
       'status': ItemStatus.undone.value
     });
     await db.insert('item', {
