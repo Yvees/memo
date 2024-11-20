@@ -360,6 +360,11 @@ class DatabaseHelper {
     });
     await db.insert('item', {
       'type': ItemType.fruit.value,
+      'name': '柿子',
+      'status': ItemStatus.undone.value
+    });
+    await db.insert('item', {
+      'type': ItemType.fruit.value,
       'name': '葱',
       'status': ItemStatus.undone.value
     });
