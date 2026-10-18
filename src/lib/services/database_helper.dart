@@ -1,5 +1,8 @@
 import 'package:path/path.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+// 移动端（Android/iOS）由 sqflite 插件提供数据库实现
+import 'package:sqflite/sqflite.dart';
+// Windows 桌面端没有 sqflite 插件，改用 FFI 实现
+import 'package:sqflite_common_ffi/sqflite_ffi.dart' show databaseFactoryFfi;
 import 'dart:io' show Platform;
 import '../models/item_entry.dart';
 
