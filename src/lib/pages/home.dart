@@ -31,37 +31,15 @@ class HomePageState extends State<HomePage> {
           ],
         ),
         actions: [
-          IconButton(
+          // PopupMenuButton 会自动把菜单定位在按钮旁边
+          PopupMenuButton<String>(
             icon: const Icon(Icons.menu, color: Colors.white),
-            onPressed: () {
-              showMenu(
-                context: context,
-                position: const RelativeRect.fromLTRB(100, 75, 0, 0),
-                items: [
-                  PopupMenuItem(
-                    value: 'add',
-                    child: const Text('添加项目'),
-                    onTap: () {
-                      Navigator.pushNamed(context, '/add');
-                    },
-                  ),
-                  PopupMenuItem(
-                    value: 'repeat',
-                    child: const Text('移除项目'),
-                    onTap: () {
-                      Navigator.pushNamed(context, '/remove');
-                    },
-                  ),
-                  PopupMenuItem(
-                    value: 'reset',
-                    child: const Text('重置所有'),
-                    onTap: () {
-                      Navigator.pushNamed(context, '/reset');
-                    },
-                  ),
-                ],
-              );
-            },
+            onSelected: (route) => Navigator.pushNamed(context, route),
+            itemBuilder: (context) => const [
+              PopupMenuItem(value: '/add', child: Text('添加项目')),
+              PopupMenuItem(value: '/remove', child: Text('移除项目')),
+              PopupMenuItem(value: '/reset', child: Text('重置所有')),
+            ],
           ),
         ],
         centerTitle: true,
