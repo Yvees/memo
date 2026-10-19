@@ -1,4 +1,4 @@
-// 物品列表的界面测试：读取失败时显示原因与重试。
+// 物品列表的界面测试：读取失败时显示原因与重试，下拉刷新。
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -11,21 +11,22 @@ import 'package:provider/provider.dart';
 
 import 'data_source_page_test.dart' show MemoryConfigStore;
 
-/// 前 [failures] 次读取抛出网络错误，之后正常返回
-class FlakyRepository implements ItemRepository {
-  FlakyRepository(this.failures);
+/// 按顺序返回预设结果：字符串列表表示物品名，异常表示读取失败
+class ScriptedRepository implements ItemRepository {
+  ScriptedRepository(this.results);
 
-  int failures;
+  final List<Object> results;
   int reads = 0;
 
   @override
   Future<List<ItemEntry>> getItemsByType(ItemType type) async {
+    final result = results[reads < results.length ? reads : results.length - 1];
     reads++;
-    if (failures > 0) {
-      failures--;
-      throw const SocketException('Connection refused');
-    }
-    return [ItemEntry(id: 1, type: type, name: '鸡蛋')];
+    if (result is Exception) throw result;
+    return [
+      for (final (i, name) in (result as List<String>).indexed)
+        ItemEntry(id: i + 1, type: type, name: name),
+    ];
   }
 
   @override
@@ -45,9 +46,10 @@ class FlakyRepository implements ItemRepository {
 }
 
 void main() {
+  const networkError = SocketException('Connection refused');
+
   Future<void> pumpList(WidgetTester tester, ItemRepository repo) async {
-    final service =
-        DataSourceService(local: repo, config: MemoryConfigStore());
+    final service = DataSourceService(local: repo, config: MemoryConfigStore());
     await tester.pumpWidget(ChangeNotifierProvider.value(
       value: service,
       child: const MaterialApp(
@@ -57,8 +59,17 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> pullToRefresh(WidgetTester tester) async {
+    await tester.fling(
+        find.byType(Scrollable).first, const Offset(0, 400), 1000);
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('读取失败时显示中文原因和重试按钮，重试成功后显示数据', (tester) async {
-    final repo = FlakyRepository(1);
+    final repo = ScriptedRepository([
+      networkError,
+      ['鸡蛋']
+    ]);
     await pumpList(tester, repo);
     expect(find.textContaining('读取数据失败：无法连接到服务器'), findsOneWidget);
     expect(find.text('鸡蛋'), findsNothing);
@@ -66,6 +77,47 @@ void main() {
     await tester.tap(find.text('重试'));
     await tester.pumpAndSettle();
     expect(repo.reads, 2);
+    expect(find.text('鸡蛋'), findsOneWidget);
+  });
+
+  testWidgets('下拉刷新读取最新数据', (tester) async {
+    final repo = ScriptedRepository([
+      ['鸡蛋'],
+      ['鸡蛋', '面包']
+    ]);
+    await pumpList(tester, repo);
+    expect(find.text('面包'), findsNothing);
+
+    await pullToRefresh(tester);
+    expect(repo.reads, 2);
+    expect(find.text('面包'), findsOneWidget);
+  });
+
+  testWidgets('刷新失败时保留现有列表并提示', (tester) async {
+    final repo = ScriptedRepository([
+      ['鸡蛋'],
+      networkError
+    ]);
+    await pumpList(tester, repo);
+
+    await pullToRefresh(tester);
+    expect(find.text('鸡蛋'), findsOneWidget);
+    expect(find.textContaining('刷新失败：无法连接到服务器'), findsOneWidget);
+  });
+
+  testWidgets('空列表和错误状态也能下拉刷新', (tester) async {
+    final repo = ScriptedRepository([
+      <String>[],
+      networkError,
+      ['鸡蛋']
+    ]);
+    await pumpList(tester, repo);
+    expect(find.text('没有数据'), findsOneWidget);
+
+    await pullToRefresh(tester);
+    expect(find.text('没有数据'), findsOneWidget); // 已有（空）数据，失败只提示
+
+    await pullToRefresh(tester);
     expect(find.text('鸡蛋'), findsOneWidget);
   });
 }
