@@ -73,7 +73,7 @@ class RemovePageState extends State<RemovePage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          item.type.toString().split('.').last,
+                          item.type.label,
                           style: TextStyle(color: Colors.lightGreen[700]),
                         ),
                       ),

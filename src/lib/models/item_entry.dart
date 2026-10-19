@@ -7,15 +7,16 @@ enum ItemStatus {
 }
 
 enum ItemType {
-  home(0),
-  food(1),
-  fruit(2),
-  meat(3),
-  drink(4),
-  baby(5);
+  home(0, '日用'),
+  food(1, '食物'),
+  fruit(2, '蔬果'),
+  meat(3, '肉类'),
+  drink(4, '饮料'),
+  baby(5, '婴儿');
 
   final int value;
-  const ItemType(this.value);
+  final String label;
+  const ItemType(this.value, this.label);
 }
 
 class ItemEntry {

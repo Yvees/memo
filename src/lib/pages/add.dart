@@ -57,7 +57,7 @@ class AddPageState extends State<AddPage> {
                 items: ItemType.values.map((ItemType type) {
                   return DropdownMenuItem<ItemType>(
                     value: type,
-                    child: Text(_getItemTypeName(type)),
+                    child: Text(type.label),
                   );
                 }).toList(),
                 onChanged: (ItemType? newValue) {
@@ -97,23 +97,6 @@ class AddPageState extends State<AddPage> {
       if (mounted) {
         Navigator.pop(context, newItem);
       }
-    }
-  }
-
-  String _getItemTypeName(ItemType type) {
-    switch (type) {
-      case ItemType.home:
-        return '日用';
-      case ItemType.food:
-        return '食物';
-      case ItemType.fruit:
-        return '蔬果';
-      case ItemType.meat:
-        return '肉类';
-      case ItemType.drink:
-        return '饮料';
-      case ItemType.baby:
-        return '婴儿';
     }
   }
 }
