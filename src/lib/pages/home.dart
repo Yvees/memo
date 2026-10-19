@@ -12,6 +12,7 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   ItemType _currentType = ItemType.home;
+  int _reloadToken = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +35,7 @@ class HomePageState extends State<HomePage> {
           // PopupMenuButton 会自动把菜单定位在按钮旁边
           PopupMenuButton<String>(
             icon: const Icon(Icons.menu, color: Colors.white),
-            onSelected: (route) => Navigator.pushNamed(context, route),
+            onSelected: _openPage,
             itemBuilder: (context) => const [
               PopupMenuItem(value: '/add', child: Text('添加项目')),
               PopupMenuItem(value: '/remove', child: Text('移除项目')),
@@ -44,8 +45,16 @@ class HomePageState extends State<HomePage> {
         ],
         centerTitle: true,
       ),
-      body: ItemListView(type: _currentType),
+      // 换 key 会重建列表，从而重新读取数据库
+      body: ItemListView(key: ValueKey(_reloadToken), type: _currentType),
     );
+  }
+
+  Future<void> _openPage(String route) async {
+    await Navigator.pushNamed(context, route);
+    // 子页面可能增删改了数据，返回后刷新列表
+    if (!mounted) return;
+    setState(() => _reloadToken++);
   }
 
   Widget _buildIconButton(BuildContext context, IconData icon, ItemType type) {
