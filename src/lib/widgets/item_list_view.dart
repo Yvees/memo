@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/item_entry.dart';
-import '../services/database_helper.dart'; // 假设您有一个数据库服务
+import '../services/data_source.dart';
+import '../services/item_repository.dart';
 
 class ItemListView extends StatefulWidget {
   final ItemType type;
@@ -28,8 +30,11 @@ class _ItemListViewState extends State<ItemListView> {
     }
   }
 
+  ItemRepository get _repository =>
+      context.read<DataSourceService>().repository;
+
   void _loadItems() {
-    _itemsFuture = DatabaseHelper().getItemsByType(widget.type);
+    _itemsFuture = _repository.getItemsByType(widget.type);
   }
 
   @override
@@ -83,7 +88,7 @@ class _ItemListViewState extends State<ItemListView> {
       item.status = undone ? ItemStatus.undone : ItemStatus.done;
     });
     try {
-      await DatabaseHelper().updateItem(item); // 更新数据库
+      await _repository.updateItem(item); // 更新数据库
     } catch (e) {
       // 写库失败时回滚界面状态，避免与数据库不一致
       if (!mounted) return;

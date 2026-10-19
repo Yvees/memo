@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/item_entry.dart';
-import '../services/database_helper.dart';
+import '../services/data_source.dart';
+import '../services/item_repository.dart';
 
 class RemovePage extends StatefulWidget {
   const RemovePage({super.key});
@@ -10,22 +12,24 @@ class RemovePage extends StatefulWidget {
 }
 
 class RemovePageState extends State<RemovePage> {
+  late final ItemRepository _repository;
   late Future<List<ItemEntry>> _itemsFuture;
 
   @override
   void initState() {
     super.initState();
+    _repository = context.read<DataSourceService>().repository;
     _itemsFuture = _loadItems();
   }
 
   Future<List<ItemEntry>> _loadItems() async {
-    final items = await DatabaseHelper().getItems();
+    final items = await _repository.getItems();
     items.sort((a, b) => a.type.index.compareTo(b.type.index));
     return items;
   }
 
   Future<void> _removeItem(ItemEntry item) async {
-    await DatabaseHelper().deleteItem(item.id!);
+    await _repository.deleteItem(item.id!);
     setState(() {
       _itemsFuture = _loadItems();
     });

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/database_helper.dart';
+import 'package:provider/provider.dart';
+import '../services/data_source.dart';
 
 class ResetPage extends StatelessWidget {
   const ResetPage({super.key});
@@ -47,7 +48,7 @@ class ResetPage extends StatelessWidget {
 
   void _resetAllItems(BuildContext context, bool isDone) async {
     try {
-      await DatabaseHelper().resetAllItems(isDone);
+      await context.read<DataSourceService>().repository.resetAllItems(isDone);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(isDone ? '所有项目已标记为完成' : '所有项目已标记为未完成')),

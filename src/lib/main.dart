@@ -6,6 +6,7 @@ import 'pages/add.dart';
 import 'pages/home.dart';
 import 'pages/remove.dart';
 import 'pages/reset.dart';
+import 'services/data_source.dart';
 import 'services/database_helper.dart';
 
 void main() async {
@@ -25,8 +26,8 @@ void main() async {
   await dbHelper.database;
 
   runApp(
-    Provider<DatabaseHelper>(
-      create: (context) => dbHelper,
+    ChangeNotifierProvider<DataSourceService>(
+      create: (context) => DataSourceService(local: dbHelper),
       child: const MainApp(),
     ),
   );

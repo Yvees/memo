@@ -5,8 +5,10 @@ import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' show databaseFactoryFfi;
 import 'dart:io' show Platform;
 import '../models/item_entry.dart';
+import 'item_repository.dart';
 
-class DatabaseHelper {
+/// 本机数据源：数据保存在设备上的 SQLite 数据库 memo.db 中。
+class DatabaseHelper implements ItemRepository {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _database;
 
@@ -596,11 +598,13 @@ class DatabaseHelper {
     });
   }
 
+  @override
   Future<int> insertItem(ItemEntry entry) async {
     Database db = await database;
     return await db.insert('item', entry.toMap());
   }
 
+  @override
   Future<List<ItemEntry>> getItems() async {
     Database db = await database;
     final List<Map<String, dynamic>> maps =
@@ -608,6 +612,7 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) => ItemEntry.fromMap(maps[i]));
   }
 
+  @override
   Future<List<ItemEntry>> getItemsByType(ItemType type) async {
     Database db = await database;
     final List<Map<String, dynamic>> maps = await db.query('item',
@@ -615,6 +620,7 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) => ItemEntry.fromMap(maps[i]));
   }
 
+  @override
   Future<int> deleteItem(int id) async {
     final db = await database;
     return await db.delete(
@@ -624,6 +630,7 @@ class DatabaseHelper {
     );
   }
 
+  @override
   Future<int> updateItem(ItemEntry entry) async {
     final db = await database;
     return await db.update(
@@ -634,6 +641,7 @@ class DatabaseHelper {
     );
   }
 
+  @override
   Future<void> resetAllItems(bool isDone) async {
     final db = await database;
     await db.update(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/item_entry.dart';
-import '../services/database_helper.dart';
+import '../services/data_source.dart';
 
 class AddPage extends StatefulWidget {
   const AddPage({super.key});
@@ -92,8 +93,8 @@ class AddPageState extends State<AddPage> {
         type: _selectedType,
         name: _name,
       );
-      // 将newItem保存到数据库
-      await DatabaseHelper().insertItem(newItem);
+      // 将newItem保存到当前数据源
+      await context.read<DataSourceService>().repository.insertItem(newItem);
       if (mounted) {
         Navigator.pop(context, newItem);
       }
