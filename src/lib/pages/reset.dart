@@ -7,7 +7,10 @@ class ResetPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('重置所有项目')),
+      appBar: AppBar(
+        title: const Text('重置所有项目'),
+        backgroundColor: Colors.lightGreen,
+      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
