@@ -64,15 +64,27 @@ class _ItemListViewState extends State<ItemListView> {
         return SwitchListTile(
           title: Text(item.name),
           value: item.status == ItemStatus.undone, // 未完成时开关打开
-          onChanged: (bool value) {
-            setState(() {
-              item.status = value ? ItemStatus.undone : ItemStatus.done;
-              DatabaseHelper().updateItem(item); // 更新数据库
-            });
-          },
+          onChanged: (bool value) => _toggleItem(item, value),
           activeTrackColor: Colors.lightGreen, // 未完成（开关打开）时中间区域的颜色
         );
       },
     );
+  }
+
+  Future<void> _toggleItem(ItemEntry item, bool undone) async {
+    final previous = item.status;
+    setState(() {
+      item.status = undone ? ItemStatus.undone : ItemStatus.done;
+    });
+    try {
+      await DatabaseHelper().updateItem(item); // 更新数据库
+    } catch (e) {
+      // 写库失败时回滚界面状态，避免与数据库不一致
+      if (!mounted) return;
+      setState(() => item.status = previous);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('更新失败：$e')),
+      );
+    }
   }
 }
