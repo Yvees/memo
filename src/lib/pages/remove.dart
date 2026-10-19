@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/item_entry.dart';
 import '../services/data_source.dart';
+import '../services/data_source_errors.dart';
 import '../services/item_repository.dart';
 
 class RemovePage extends StatefulWidget {
@@ -29,13 +30,19 @@ class RemovePageState extends State<RemovePage> {
   }
 
   Future<void> _removeItem(ItemEntry item) async {
-    await _repository.deleteItem(item.id!);
+    String message;
+    try {
+      await _repository.deleteItem(item.id!);
+      message = '项目 "${item.name}" 已删除';
+    } catch (e) {
+      message = '删除失败：${describeDataSourceError(e)}';
+    }
+    if (!mounted) return;
     setState(() {
       _itemsFuture = _loadItems();
     });
-    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('项目 "${item.name}" 已删除')),
+      SnackBar(content: Text(message)),
     );
   }
 
@@ -52,7 +59,21 @@ class RemovePageState extends State<RemovePage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('加载失败：${snapshot.error}'));
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('加载失败：${describeDataSourceError(snapshot.error!)}'),
+                  const SizedBox(height: 12),
+                  ElevatedButton.icon(
+                    onPressed: () =>
+                        setState(() => _itemsFuture = _loadItems()),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('重试'),
+                  ),
+                ],
+              ),
+            );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('没有项目'));
           } else {

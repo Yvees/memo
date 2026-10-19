@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/data_source.dart';
+import '../services/data_source_errors.dart';
 
 class ResetPage extends StatelessWidget {
   const ResetPage({super.key});
@@ -56,7 +57,7 @@ class ResetPage extends StatelessWidget {
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('操作失败：$e')),
+        SnackBar(content: Text('操作失败：${describeDataSourceError(e)}')),
       );
     }
   }

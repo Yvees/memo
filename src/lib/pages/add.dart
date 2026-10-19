@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/item_entry.dart';
 import '../services/data_source.dart';
+import '../services/data_source_errors.dart';
 
 class AddPage extends StatefulWidget {
   const AddPage({super.key});
@@ -93,8 +94,16 @@ class AddPageState extends State<AddPage> {
         type: _selectedType,
         name: _name,
       );
-      // 将newItem保存到当前数据源
-      await context.read<DataSourceService>().repository.insertItem(newItem);
+      // 将newItem保存到当前数据源，失败时留在本页以便重试
+      try {
+        await context.read<DataSourceService>().repository.insertItem(newItem);
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('保存失败：${describeDataSourceError(e)}')),
+        );
+        return;
+      }
       if (mounted) {
         Navigator.pop(context, newItem);
       }

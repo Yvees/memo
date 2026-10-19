@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/item_entry.dart';
 import '../services/data_source.dart';
+import '../services/data_source_errors.dart';
 import '../services/item_repository.dart';
 
 class ItemListView extends StatefulWidget {
@@ -45,7 +46,7 @@ class _ItemListViewState extends State<ItemListView> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('错误: ${snapshot.error}'));
+          return _buildError(snapshot.error!);
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const Center(child: Text('没有数据'));
         }
@@ -73,6 +74,38 @@ class _ItemListViewState extends State<ItemListView> {
     );
   }
 
+  /// 读取失败（多见于网络数据源断网或服务器不可用）时显示原因和重试按钮
+  Widget _buildError(Object error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.cloud_off, size: 48, color: Colors.grey),
+            const SizedBox(height: 12),
+            Text(
+              '读取数据失败：${describeDataSourceError(error)}',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () => setState(_loadItems),
+              icon: const Icon(Icons.refresh),
+              label: const Text('重试'),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '也可以在右上角菜单的"数据源配置"中切换回本机',
+              style: Theme.of(context).textTheme.bodySmall,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildTile(ItemEntry item) {
     return SwitchListTile(
       title: Text(item.name),
@@ -94,7 +127,7 @@ class _ItemListViewState extends State<ItemListView> {
       if (!mounted) return;
       setState(() => item.status = previous);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('更新失败：$e')),
+        SnackBar(content: Text('更新失败：${describeDataSourceError(e)}')),
       );
     }
   }
