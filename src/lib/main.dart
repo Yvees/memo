@@ -20,9 +20,9 @@ void main() async {
     databaseFactory = databaseFactoryFfi;
   }
 
-  // Initialize the database
+  // Initialize the database (opened once and cached by DatabaseHelper)
   final dbHelper = DatabaseHelper();
-  await dbHelper.initDatabase();
+  await dbHelper.database;
 
   runApp(
     Provider<DatabaseHelper>(
