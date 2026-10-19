@@ -13,6 +13,7 @@ dependencies:
   provider: ^6.1.2
   path: ^1.9.0
   sqflite: ^2.4.1
+  mysql_client: ^0.0.27
 
 dev_dependencies:
   flutter_test:
