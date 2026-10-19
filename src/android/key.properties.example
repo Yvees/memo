@@ -1,0 +1,8 @@
+# 复制为同目录下的 key.properties 并填入真实值（key.properties 已被 .gitignore 忽略，切勿提交）
+# 生成密钥库示例：
+#   keytool -genkey -v -keystore memo-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias memo
+storePassword=<密钥库密码>
+keyPassword=<密钥密码>
+keyAlias=memo
+# 相对于 android/app 目录的路径，或绝对路径
+storeFile=../memo-release.jks
