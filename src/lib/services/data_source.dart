@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../models/item_entry.dart';
 import 'config_store.dart';
 import 'item_repository.dart';
 import 'mysql_item_repository.dart';
@@ -83,8 +84,19 @@ class DataSourceService extends ChangeNotifier {
   }
 
   /// 切换到网络数据源。调用前应先用 [testRemote] 确认可以连接。
-  Future<void> useRemote(String url) async {
+  ///
+  /// [upload] 不为空时先把这些物品导入网络数据库，导入失败则不切换。
+  Future<void> useRemote(String url,
+      {List<ItemEntry> upload = const []}) async {
     final remote = _remoteFactory(MySqlConfig.parse(url));
+    if (upload.isNotEmpty) {
+      try {
+        await remote.importItems(upload);
+      } catch (_) {
+        await remote.close();
+        rethrow;
+      }
+    }
     _remoteUrl = url.trim();
     await _config.setConfig(_keyRemoteUrl, _remoteUrl);
     await _config.setConfig(_keyType, DataSourceType.remote.name);

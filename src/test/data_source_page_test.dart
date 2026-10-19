@@ -21,8 +21,12 @@ class MemoryConfigStore implements ConfigStore {
 }
 
 class FakeLocalRepository implements ItemRepository {
+  FakeLocalRepository([this.items = const []]);
+
+  final List<ItemEntry> items;
+
   @override
-  Future<List<ItemEntry>> getItems() async => [];
+  Future<List<ItemEntry>> getItems() async => items;
 
   @override
   Future<List<ItemEntry>> getItemsByType(ItemType type) async => [];
@@ -40,12 +44,20 @@ class FakeLocalRepository implements ItemRepository {
   Future<void> resetAllItems(bool isDone) async {}
 }
 
+/// 假的网络数据库：[remoteItemCount] 为远端现有条数，[uploaded] 记录导入的数据
+int remoteItemCount = 3;
+final uploaded = <ItemEntry>[];
+
 class FakeRemoteRepository extends MySqlItemRepository {
   FakeRemoteRepository(super.config);
 
   @override
   Future<MySqlServerInfo> testConnection() async =>
-      const MySqlServerInfo(version: '8.0.99', itemCount: 3);
+      MySqlServerInfo(version: '8.0.99', itemCount: remoteItemCount);
+
+  @override
+  Future<void> importItems(List<ItemEntry> entries) async =>
+      uploaded.addAll(entries);
 
   @override
   Future<void> close() async {}
@@ -54,11 +66,17 @@ class FakeRemoteRepository extends MySqlItemRepository {
 void main() {
   late MemoryConfigStore store;
   late DataSourceService service;
+  final localItems = [
+    ItemEntry(id: 1, type: ItemType.food, name: '鸡蛋'),
+    ItemEntry(id: 2, type: ItemType.drink, name: '牛奶'),
+  ];
 
   setUp(() {
+    remoteItemCount = 3;
+    uploaded.clear();
     store = MemoryConfigStore();
     service = DataSourceService(
-      local: FakeLocalRepository(),
+      local: FakeLocalRepository(localItems),
       config: store,
       remoteFactory: FakeRemoteRepository.new,
     );
@@ -123,6 +141,44 @@ void main() {
     expect(store.values['remote_url'], 'mysql://memo:pw@db.example.com/shop');
     // 保存后返回上一页
     expect(find.byType(DataSourcePage), findsNothing);
+  });
+
+  Future<void> saveRemoteWithEmptyServer(WidgetTester tester) async {
+    remoteItemCount = 0;
+    await openPage(tester);
+    await tester.tap(find.text('网络'));
+    await tester.pump();
+    await tester.enterText(
+        find.byType(TextField), 'mysql://memo:pw@db.example.com/shop');
+    await tester.tap(find.text('保存'));
+    await tester.pumpAndSettle();
+    expect(find.text('上传本机数据？'), findsOneWidget);
+    expect(find.textContaining('本机的 2 条数据'), findsOneWidget);
+  }
+
+  testWidgets('网络数据库为空时询问上传，选择上传后导入本机数据并切换', (tester) async {
+    await saveRemoteWithEmptyServer(tester);
+    await tester.tap(find.text('上传'));
+    await tester.pumpAndSettle();
+    expect(uploaded.map((e) => e.name), ['鸡蛋', '牛奶']);
+    expect(service.type, DataSourceType.remote);
+  });
+
+  testWidgets('选择不上传时直接切换，不导入数据', (tester) async {
+    await saveRemoteWithEmptyServer(tester);
+    await tester.tap(find.text('不上传'));
+    await tester.pumpAndSettle();
+    expect(uploaded, isEmpty);
+    expect(service.type, DataSourceType.remote);
+  });
+
+  testWidgets('选择取消时不保存，仍为本机', (tester) async {
+    await saveRemoteWithEmptyServer(tester);
+    await tester.tap(find.text('取消'));
+    await tester.pumpAndSettle();
+    expect(uploaded, isEmpty);
+    expect(service.type, DataSourceType.local);
+    expect(find.byType(DataSourcePage), findsOneWidget);
   });
 
   testWidgets('切回本机时保留之前填写的连接串', (tester) async {

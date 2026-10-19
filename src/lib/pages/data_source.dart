@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/item_entry.dart';
 import '../services/data_source.dart';
 import '../services/data_source_errors.dart';
 import '../services/mysql_item_repository.dart';
@@ -73,13 +74,59 @@ class DataSourcePageState extends State<DataSourcePage> {
       // 保存前必须能连上，避免切换到一个无法使用的数据源
       final info = await _runTest();
       if (info == null) return;
-      await _service.useRemote(_urlController.text);
+
+      // 网络数据库为空时，询问是否把本机数据带过去
+      var upload = <ItemEntry>[];
+      if (info.itemCount == 0) {
+        final localItems = await _service.local.getItems();
+        if (localItems.isNotEmpty) {
+          final choice = await _askUpload(localItems.length);
+          if (choice == null) return; // 取消
+          if (choice) upload = localItems;
+        }
+      }
+
+      setState(() => _busy = true);
+      try {
+        await _service.useRemote(_urlController.text, upload: upload);
+      } catch (e) {
+        _showTestResult(false, '上传本机数据失败：${describeDataSourceError(e)}');
+        return;
+      } finally {
+        if (mounted) setState(() => _busy = false);
+      }
     }
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('已切换到${_service.description}')),
     );
     Navigator.pop(context);
+  }
+
+  /// 返回 true 上传，false 不上传，null 取消保存
+  Future<bool?> _askUpload(int count) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('上传本机数据？'),
+        content: Text('网络数据库中还没有数据。是否把本机的 $count 条数据上传到网络？\n'
+            '不上传则从空清单开始；本机数据不会被删除，切回本机后仍可使用。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('不上传'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('上传'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
