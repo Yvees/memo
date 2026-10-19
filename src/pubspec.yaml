@@ -30,3 +30,7 @@ flutter_icons:
   android: true
   ios: true
   image_path: "assets/icon/app_icon.png"
+  # Android 8.0+ 使用自适应图标：白色背景 + 原图作前景，四周留 25% 边距避免被圆形遮罩裁掉
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/icon/app_icon.png"
+  adaptive_icon_foreground_inset: 25
