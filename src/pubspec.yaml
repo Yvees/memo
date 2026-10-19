@@ -12,13 +12,14 @@ dependencies:
   sqflite_common_ffi: ^2.3.3
   provider: ^6.1.2
   path: ^1.9.0
-  flutter_launcher_icons: ^0.14.0
   sqflite: ^2.4.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  # 仅在开发时用于生成应用图标（dart run flutter_launcher_icons），不打包进 App
+  flutter_launcher_icons: ^0.14.0
 
 flutter:
   uses-material-design: true
