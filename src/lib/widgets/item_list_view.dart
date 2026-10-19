@@ -45,29 +45,35 @@ class _ItemListViewState extends State<ItemListView> {
           return const Center(child: Text('没有数据'));
         }
 
+        // 前一半放左列、后一半放右列，两列放在同一个 ListView 中一起滚动
         final items = snapshot.data!;
-        return Row(
-          children: [
-            Expanded(child: _buildColumn(items.sublist(0, items.length ~/ 2))),
-            Expanded(child: _buildColumn(items.sublist(items.length ~/ 2))),
-          ],
+        final left = items.sublist(0, (items.length + 1) ~/ 2);
+        final right = items.sublist(left.length);
+        return ListView.builder(
+          itemCount: left.length,
+          itemBuilder: (context, index) {
+            return Row(
+              children: [
+                Expanded(child: _buildTile(left[index])),
+                Expanded(
+                  child: index < right.length
+                      ? _buildTile(right[index])
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            );
+          },
         );
       },
     );
   }
 
-  Widget _buildColumn(List<ItemEntry> items) {
-    return ListView.builder(
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return SwitchListTile(
-          title: Text(item.name),
-          value: item.status == ItemStatus.undone, // 未完成时开关打开
-          onChanged: (bool value) => _toggleItem(item, value),
-          activeTrackColor: Colors.lightGreen, // 未完成（开关打开）时中间区域的颜色
-        );
-      },
+  Widget _buildTile(ItemEntry item) {
+    return SwitchListTile(
+      title: Text(item.name),
+      value: item.status == ItemStatus.undone, // 未完成时开关打开
+      onChanged: (bool value) => _toggleItem(item, value),
+      activeTrackColor: Colors.lightGreen, // 未完成（开关打开）时中间区域的颜色
     );
   }
 
