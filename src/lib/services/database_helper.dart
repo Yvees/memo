@@ -5,10 +5,12 @@ import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' show databaseFactoryFfi;
 import 'dart:io' show Platform;
 import '../models/item_entry.dart';
+import 'config_store.dart';
 import 'item_repository.dart';
 
 /// 本机数据源：数据保存在设备上的 SQLite 数据库 memo.db 中。
-class DatabaseHelper implements ItemRepository {
+/// 同时负责保存 App 的设置（config 表），无论当前使用哪个数据源，设置都存在本机。
+class DatabaseHelper implements ItemRepository, ConfigStore {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _database;
 
@@ -22,26 +24,67 @@ class DatabaseHelper implements ItemRepository {
     return _database!;
   }
 
+  /// 数据库结构版本：
+  /// 1 - item 表
+  /// 2 - 新增 config 表（键值对，保存数据源等设置）
+  static const _dbVersion = 2;
+
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), 'memo.db');
     if (Platform.isWindows) {
       return await databaseFactoryFfi.openDatabase(
         path,
         options: OpenDatabaseOptions(
-          version: 1,
+          version: _dbVersion,
           onCreate: _createDb,
+          onUpgrade: _upgradeDb,
         ),
       );
     } else {
       return await openDatabase(
         path,
-        version: 1,
+        version: _dbVersion,
         onCreate: _createDb,
+        onUpgrade: _upgradeDb,
       );
     }
   }
 
+  /// 已安装的旧版本升级时逐级补齐表结构，原有数据保留
+  Future<void> _upgradeDb(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await _createConfigTable(db);
+    }
+  }
+
+  Future<void> _createConfigTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE config(
+        key TEXT NOT NULL PRIMARY KEY,
+        value TEXT NOT NULL
+      )
+    ''');
+  }
+
+  /// 读取设置项，不存在时返回 null
+  @override
+  Future<String?> getConfig(String key) async {
+    final db = await database;
+    final rows = await db.query('config',
+        columns: ['value'], where: 'key = ?', whereArgs: [key]);
+    return rows.isEmpty ? null : rows.first['value'] as String;
+  }
+
+  /// 写入设置项，已存在则覆盖
+  @override
+  Future<void> setConfig(String key, String value) async {
+    final db = await database;
+    await db.insert('config', {'key': key, 'value': value},
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
   Future<void> _createDb(Database db, int version) async {
+    await _createConfigTable(db);
     await db.execute('''
       CREATE TABLE item(
         id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
