@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memo/models/item_entry.dart';
+import 'package:memo/services/data_source_errors.dart';
 import 'package:memo/services/mysql_item_repository.dart';
 import 'package:mysql_client/mysql_client.dart';
 
@@ -81,5 +82,50 @@ void main() {
           List.generate(10, (_) => repo.getItemsByType(ItemType.food)));
       expect(results.every((r) => r.length == 2), isTrue);
     });
+
+    Future<String> errorOf(MySqlConfig config) async {
+      final bad = MySqlItemRepository(config, tableName: table);
+      try {
+        await bad.testConnection();
+        return '';
+      } catch (e) {
+        return describeDataSourceError(e);
+      } finally {
+        await bad.close();
+      }
+    }
+
+    test('密码错误时给出中文提示', () async {
+      final c = MySqlConfig.parse(url!);
+      final message = await errorOf(MySqlConfig(
+          host: c.host,
+          port: c.port,
+          user: c.user,
+          password: '${c.password}-wrong',
+          database: c.database,
+          ssl: c.ssl));
+      expect(message, '用户名或密码错误');
+    });
+
+    test('数据库不存在时给出中文提示', () async {
+      final c = MySqlConfig.parse(url!);
+      final message = await errorOf(MySqlConfig(
+          host: c.host,
+          port: c.port,
+          user: c.user,
+          password: c.password,
+          database: 'memo_no_such_db_${DateTime.now().millisecondsSinceEpoch}',
+          ssl: c.ssl));
+      expect(message, contains('数据库不存在'));
+    });
+  });
+
+  test('端口不通时给出中文提示', () async {
+    final repo = MySqlItemRepository(const MySqlConfig(
+        host: '127.0.0.1', port: 1, user: 'u', password: 'p', database: 'd'));
+    final message = await repo
+        .testConnection()
+        .then((_) => '', onError: (Object e) => describeDataSourceError(e));
+    expect(message, contains('无法连接到服务器'));
   });
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../models/item_entry.dart';
+import '../services/data_source.dart';
 import '../widgets/item_list_view.dart';
 
 class HomePage extends StatefulWidget {
@@ -36,10 +38,16 @@ class HomePageState extends State<HomePage> {
           PopupMenuButton<String>(
             icon: const Icon(Icons.menu, color: Colors.white),
             onSelected: _openPage,
-            itemBuilder: (context) => const [
-              PopupMenuItem(value: '/add', child: Text('添加项目')),
-              PopupMenuItem(value: '/remove', child: Text('移除项目')),
-              PopupMenuItem(value: '/reset', child: Text('重置所有')),
+            itemBuilder: (context) => [
+              const PopupMenuItem(value: '/add', child: Text('添加项目')),
+              const PopupMenuItem(value: '/remove', child: Text('移除项目')),
+              const PopupMenuItem(value: '/reset', child: Text('重置所有')),
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                value: '/datasource',
+                child: Text(
+                    '数据源配置（${context.read<DataSourceService>().type.label}）'),
+              ),
             ],
           ),
         ],

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io' show Platform;
 import 'pages/add.dart';
+import 'pages/data_source.dart';
 import 'pages/home.dart';
 import 'pages/remove.dart';
 import 'pages/reset.dart';
@@ -25,9 +26,13 @@ void main() async {
   final dbHelper = DatabaseHelper();
   await dbHelper.database;
 
+  // 读取数据源设置（本机或网络），设置本身保存在本机数据库中
+  final dataSource = DataSourceService(local: dbHelper, config: dbHelper);
+  await dataSource.load();
+
   runApp(
-    ChangeNotifierProvider<DataSourceService>(
-      create: (context) => DataSourceService(local: dbHelper),
+    ChangeNotifierProvider<DataSourceService>.value(
+      value: dataSource,
       child: const MainApp(),
     ),
   );
@@ -55,6 +60,7 @@ class MainApp extends StatelessWidget {
         '/add': (context) => const AddPage(),
         '/remove': (context) => const RemovePage(),
         '/reset': (context) => const ResetPage(),
+        '/datasource': (context) => const DataSourcePage(),
       },
     );
   }
