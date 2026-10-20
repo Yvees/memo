@@ -5,6 +5,7 @@ import 'dart:io' show Platform;
 import 'pages/add.dart';
 import 'pages/data_source.dart';
 import 'pages/home.dart';
+import 'pages/print.dart';
 import 'pages/remove.dart';
 import 'pages/reset.dart';
 import 'services/data_source.dart';
@@ -61,6 +62,7 @@ class MainApp extends StatelessWidget {
         '/remove': (context) => const RemovePage(),
         '/reset': (context) => const ResetPage(),
         '/datasource': (context) => const DataSourcePage(),
+        '/print': (context) => const PrintPage(),
       },
     );
   }

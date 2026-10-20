@@ -42,6 +42,7 @@ class HomePageState extends State<HomePage> {
               const PopupMenuItem(value: '/add', child: Text('添加项目')),
               const PopupMenuItem(value: '/remove', child: Text('移除项目')),
               const PopupMenuItem(value: '/reset', child: Text('重置所有')),
+              const PopupMenuItem(value: '/print', child: Text('打印清单')),
               const PopupMenuDivider(),
               PopupMenuItem(
                 value: '/datasource',
