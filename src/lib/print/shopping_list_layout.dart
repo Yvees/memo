@@ -4,23 +4,23 @@ import '../models/item_entry.dart';
 class PrintMetrics {
   static const pageWidth = 210.0;
   static const pageHeight = 297.0;
-  static const margin = 15.0;
+  static const margin = 12.0;
 
   /// 第一页顶部的标题和日期区域
-  static const headerHeight = 24.0;
+  static const headerHeight = 18.0;
 
   /// 每页底部的页码区域
-  static const footerHeight = 8.0;
+  static const footerHeight = 6.0;
 
   /// 分类标题行
-  static const categoryHeight = 11.0;
+  static const categoryHeight = 8.0;
 
   /// 物品行，每行 [columns] 个物品
-  static const rowHeight = 8.5;
-  static const columns = 3;
+  static const rowHeight = 6.5;
+  static const columns = 4;
 
   /// 分类之间的间距
-  static const categoryGap = 4.0;
+  static const categoryGap = 2.5;
 
   static const contentWidth = pageWidth - 2 * margin;
 

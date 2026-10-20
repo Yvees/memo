@@ -65,16 +65,16 @@ class ShoppingListRenderer {
 
   double _paintHeader(Canvas canvas, double top) {
     _text(canvas, '购物清单', PrintMetrics.margin, top,
-        size: 8, weight: FontWeight.bold);
+        size: 6.5, weight: FontWeight.bold);
     _text(
       canvas,
       '${date.year}年${date.month}月${date.day}日  ·  共 ${layout.itemCount} 项',
       PrintMetrics.margin,
-      top + 11,
-      size: 4,
+      top + 8.5,
+      size: 3.5,
       color: _grey,
     );
-    final lineY = top + PrintMetrics.headerHeight - 4;
+    final lineY = top + PrintMetrics.headerHeight - 3;
     _line(canvas, lineY, 0.4);
     return top + PrintMetrics.headerHeight;
   }
@@ -82,12 +82,12 @@ class ShoppingListRenderer {
   double _paintBlock(Canvas canvas, PrintBlock block, double top) {
     final title = '${block.type.label}（${block.categoryTotal} 项）'
         '${block.continued ? ' 续' : ''}';
-    _text(canvas, title, PrintMetrics.margin, top + 2,
-        size: 5, weight: FontWeight.bold);
-    _line(canvas, top + PrintMetrics.categoryHeight - 1.5, 0.2);
+    _text(canvas, title, PrintMetrics.margin, top + 1.2,
+        size: 4.2, weight: FontWeight.bold);
+    _line(canvas, top + PrintMetrics.categoryHeight - 1, 0.2);
 
     const columnWidth = PrintMetrics.contentWidth / PrintMetrics.columns;
-    const box = 3.6;
+    const box = 3.0;
     final boxPaint = Paint()
       ..color = _black
       ..style = PaintingStyle.stroke
@@ -104,19 +104,19 @@ class ShoppingListRenderer {
             x + 0.5, rowTop + (PrintMetrics.rowHeight - box) / 2, box, box),
         boxPaint,
       );
-      _text(canvas, block.names[i], x + 6, rowTop + 1.8,
-          size: 4.2, maxWidth: columnWidth - 7);
+      _text(canvas, block.names[i], x + 5, rowTop + 1.3,
+          size: 3.6, maxWidth: columnWidth - 6);
     }
     return top + block.height;
   }
 
   void _paintFooter(Canvas canvas, int index) {
     final painter = _painter('第 ${index + 1} / ${layout.pages.length} 页',
-        size: 3.2, color: _grey);
+        size: 3, color: _grey);
     painter.paint(
       canvas,
       Offset((PrintMetrics.pageWidth - painter.width) / 2,
-          PrintMetrics.pageHeight - PrintMetrics.margin - 4),
+          PrintMetrics.pageHeight - PrintMetrics.margin - 3.5),
     );
   }
 
