@@ -1,0 +1,9 @@
+# Flutter 工具（flutter pub get、flutter_launcher_icons）总是用 LF 换行重新生成下列文件。
+# 在 core.autocrlf=true 的 Windows 上，git 默认期望签出为 CRLF，导致这些文件内容未变
+# 却一直显示为"已修改"。固定为 LF，与工具输出保持一致。
+linux/flutter/generated_plugin_registrant.* text eol=lf
+linux/flutter/generated_plugins.cmake text eol=lf
+windows/flutter/generated_plugin_registrant.* text eol=lf
+windows/flutter/generated_plugins.cmake text eol=lf
+macos/Flutter/GeneratedPluginRegistrant.swift text eol=lf
+ios/Runner.xcodeproj/project.pbxproj text eol=lf
