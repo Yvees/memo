@@ -64,13 +64,13 @@ class ShoppingListRenderer {
   static const _grey = Color(0xFF666666);
 
   double _paintHeader(Canvas canvas, double top) {
-    _text(canvas, '购物清单', PrintMetrics.margin, top,
+    _text(canvas, '购物清单', PrintMetrics.margin, top + 3.5,
         size: 6.5, weight: FontWeight.bold);
     _text(
       canvas,
       '${date.year}年${date.month}月${date.day}日  ·  共 ${layout.itemCount} 项',
       PrintMetrics.margin,
-      top + 8.5,
+      top + 10.5,
       size: 3.5,
       color: _grey,
     );
@@ -82,7 +82,7 @@ class ShoppingListRenderer {
   double _paintBlock(Canvas canvas, PrintBlock block, double top) {
     final title = '${block.type.label}（${block.categoryTotal} 项）'
         '${block.continued ? ' 续' : ''}';
-    _text(canvas, title, PrintMetrics.margin, top + 1.2,
+    _text(canvas, title, PrintMetrics.margin, top + 4,
         size: 4.2, weight: FontWeight.bold);
     _line(canvas, top + PrintMetrics.categoryHeight - 1, 0.2);
 
@@ -98,13 +98,13 @@ class ShoppingListRenderer {
       final x = PrintMetrics.margin + column * columnWidth;
       final rowTop =
           top + PrintMetrics.categoryHeight + row * PrintMetrics.rowHeight;
-      // 打印出来可以手写打勾的方框
+      // 打印出来可以手写打勾的方框，文字与方框垂直居中对齐
+      final centerY = rowTop + PrintMetrics.rowHeight / 2;
       canvas.drawRect(
-        Rect.fromLTWH(
-            x + 0.5, rowTop + (PrintMetrics.rowHeight - box) / 2, box, box),
+        Rect.fromLTWH(x + 0.5, centerY - box / 2, box, box),
         boxPaint,
       );
-      _text(canvas, block.names[i], x + 5, rowTop + 1.3,
+      _text(canvas, block.names[i], x + 5, centerY,
           size: 3.6, maxWidth: columnWidth - 6);
     }
     return top + block.height;
@@ -113,10 +113,12 @@ class ShoppingListRenderer {
   void _paintFooter(Canvas canvas, int index) {
     final painter = _painter('第 ${index + 1} / ${layout.pages.length} 页',
         size: 3, color: _grey);
-    painter.paint(
+    _paintCentered(
       canvas,
-      Offset((PrintMetrics.pageWidth - painter.width) / 2,
-          PrintMetrics.pageHeight - PrintMetrics.margin - 3.5),
+      painter,
+      (PrintMetrics.pageWidth - painter.width) / 2,
+      PrintMetrics.pageHeight - PrintMetrics.margin - 1.5,
+      3,
     );
   }
 
@@ -150,12 +152,24 @@ class ShoppingListRenderer {
     )..layout(maxWidth: maxWidth);
   }
 
-  void _text(Canvas canvas, String text, double x, double y,
+  /// 绘制一行文字，使汉字字形的垂直中心落在 [centerY]。
+  void _text(Canvas canvas, String text, double x, double centerY,
       {required double size,
       FontWeight weight = FontWeight.normal,
       Color color = _black,
       double maxWidth = PrintMetrics.contentWidth}) {
-    _painter(text, size: size, weight: weight, color: color, maxWidth: maxWidth)
-        .paint(canvas, Offset(x, y));
+    final painter = _painter(text,
+        size: size, weight: weight, color: color, maxWidth: maxWidth);
+    _paintCentered(canvas, painter, x, centerY, size);
+  }
+
+  /// 按基线定位，而不是按文字框顶部：不同字体的行高（上下留白）差别很大
+  /// （如安卓的 Noto Sans CJK 比黑体高约 40%），按顶部定位会导致在手机上
+  /// 文字比方框偏下。汉字字形的中心在各中文字体中都约在基线上方 0.37 个字号处。
+  void _paintCentered(Canvas canvas, TextPainter painter, double x,
+      double centerY, double size) {
+    final baseline =
+        painter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+    painter.paint(canvas, Offset(x, centerY + size * 0.37 - baseline));
   }
 }
